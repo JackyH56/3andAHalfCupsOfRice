@@ -12,12 +12,14 @@ WINDOW_HEIGHT = 1000
 
 def main():
     pygame.init()
-    start = pygame.time.get_ticks()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("How fast?")
-
     numTargets = 3
-
+    font = pygame.font.Font('freesansbold.ttf', 32)
+    text = font.render('Click on the ' + str(numTargets) + " targets as fast as you can", True, GREEN, BLACK)
+    textRect = text.get_rect()
+    textRect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+    screen.blit(text, textRect)
     rectList = []
     running  = True
     for i in range(0,numTargets):
@@ -26,6 +28,7 @@ def main():
             pygame.draw.rect(screen, GREEN, rect, 0)
             pygame.display.update()
 
+    start = pygame.time.get_ticks()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -42,8 +45,8 @@ def main():
                             pygame.display.update()
                             numTargets -= 1
                 if numTargets == 0:
-                    running = False
                     total_time = (pygame.time.get_ticks() - start) / 1000
+                    running = False
                     print(str(total_time) + " seconds")
                     break
            
