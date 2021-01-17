@@ -1,6 +1,7 @@
 import pygame
 import math
 import random
+from pygame.math import Vector2
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -35,6 +36,7 @@ def main():
         rectList.append(rect)
         pygame.draw.rect(screen, GREEN, rect, 0)
     pygame.display.update()
+
     start = pygame.time.get_ticks() - setupTime
     while running:
         for event in pygame.event.get():
@@ -42,7 +44,7 @@ def main():
                 running = False
                 pygame.quit()
             elif not completed:
-                displayTimer(screen, font)
+                displayTimer(screen, font, 1)
                 pos = pygame.mouse.get_pos()
                 if event.type == pygame.MOUSEBUTTONUP:
                     totalClicks += 1
@@ -60,9 +62,93 @@ def main():
                                 completed = True
                                 accuracy = (accurateClicks / totalClicks) * 100
                                 stopTimer(screen, font, total_time)
-                                displayAccuracy(screen, font, accuracy)
+                                displayAccuracy(screen, font, accuracy, False)
+                                #pause 3 seconds before starting
+                                pygame.time.wait(TIME_DELAY)
+                                clearScreen(screen)
+                                
             else:
                 continue
+        if completed == True:
+            dTime, dAccuracy = dragTest(screen, numTargets, total_time)
+            displayAccuracy(screen, font, accuracy, True)
+            #pause 3 seconds before starting
+            pygame.time.wait(TIME_DELAY)
+            running = False
+        
+
+def dragTest(screen, numTargets, click_time):
+
+    font = pygame.font.Font('freesansbold.ttf', 32)
+    text = font.render("Drag the targets into the recycle bin", True, GREEN, BLACK)
+    textRect = text.get_rect()
+    textRect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+    screen.blit(text, textRect)
+    stopTimer(screen, font, click_time)
+    pygame.display.update()
+
+    dragList = []
+    selected_rect = None 
+    draging = True
+    total_click = 0
+    on_hit = 0
+
+    #pause 3 seconds before starting
+    pygame.time.wait(TIME_DELAY)
+    screen.fill(BLACK)
+
+    recycle = pygame.Rect(WINDOW_WIDTH-120, WINDOW_HEIGHT-120, 120, 120)
+    pygame.draw.rect(screen, WHITE, recycle, 0)
+    for i in range(0,3):
+            rect = generateRandRect()
+            dragList.append(rect)
+            pygame.draw.rect(screen, GREEN, rect, 0)
+    pygame.display.update()
+
+    dragStart = pygame.time.get_ticks()
+    while draging:
+        displayTimer(screen, font, 3)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                total_click += 1
+                for rect in dragList:
+                    if rect.collidepoint(event.pos):
+                        on_hit += 1
+                        offset = Vector2(rect.topleft) - event.pos
+                        selected_rect = rect
+            elif event.type == pygame.MOUSEBUTTONUP:
+                total_click += 1 
+                if not selected_rect == None:
+                    if selected_rect.colliderect(recycle):
+                        on_hit += 1
+                        dragList.remove(selected_rect)
+                        selected_rect = None
+                    else:
+                        selected_rect = None
+                else:
+                    selected_rect = None
+            elif event.type == pygame.MOUSEMOTION:
+                if selected_rect:
+                    selected_rect.topleft = event.pos + offset
+            
+            if not dragList:
+                total_drag_time = (pygame.time.get_ticks() - dragStart + click_time)
+                stopTimer(screen, font, total_drag_time)
+                draging = False
+                dragAccuracy = on_hit / total_click * 100
+                return total_drag_time, dragAccuracy
+    
+        screen.fill(BLACK)
+
+        recycle = pygame.Rect(WINDOW_WIDTH-120, WINDOW_HEIGHT-120, 120, 120)
+        pygame.draw.rect(screen, WHITE, recycle, 0)
+        for rect in dragList:
+            pygame.draw.rect(screen, GREEN, rect, 0)
+
+        pygame.display.update()
+
         
 #returns a random pygame.rect object
 def generateRandRect():
@@ -86,15 +172,17 @@ def displayInstructions(screen, font, numTargets):
 
     return
 
-def displayTimer(screen, font):
+def displayTimer(screen, font, delayMultiplier):
     pygame.draw.rect(screen, BLACK, (WINDOW_WIDTH-100,0,100,50))
-    text = font.render("%d"%(pygame.time.get_ticks() - TIME_DELAY), True, WHITE, BLACK)
+    text = font.render("%d"%(pygame.time.get_ticks() - TIME_DELAY * delayMultiplier), True, WHITE, BLACK)
     text_rect = text.get_rect()
     text_rect.center = (WINDOW_WIDTH-text_rect.width//2, 30)
     screen.blit(text, text_rect)
     pygame.display.update()
     
     return
+
+
 
 def stopTimer(screen, font, time):
     pygame.draw.rect(screen, BLACK, (WINDOW_WIDTH-100,0,100,50))
@@ -106,8 +194,11 @@ def stopTimer(screen, font, time):
 
     return
 
-def displayAccuracy(screen, font, accuracy):
-    text = font.render("Accuracy: {:.2f}%".format(accuracy), True, GREEN, BLACK)
+def displayAccuracy(screen, font, accuracy, total):
+    if total:
+        text = font.render("Total Accuracy: {:.2f}%".format(accuracy), True, GREEN, BLACK)
+    else:    
+        text = font.render("Accuracy: {:.2f}%".format(accuracy), True, GREEN, BLACK)
     textRect = text.get_rect()
     textRect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
     screen.blit(text, textRect)
