@@ -29,13 +29,16 @@ def main():
                 #     screen.fill(BLACK)
                 #     pygame.display.update()
                 # minigame2(screen, event) # clicking 4 corners real fast
-                minigame3(screen, event) # aimlab
+
+                if minigame3(screen, event):
+                    break
                 # minigame5() # 
                 # minigame6()
                 # minigame7()
                 # minigame8()
                 # minigame9()
                 # minigame10()
+        break
             
 def minigame1(screen, event):
     width = 50
@@ -110,30 +113,32 @@ def minigame2(screen, event):
                 return
 
 def minigame3(screen, event):
-    rect = generateRandRect()
-    pos = pygame.mouse.get_pos()
-    pygame.draw.rect(screen, GREEN, rect, 0)
-    pygame.display.update()
+    rectList = []
+    counter = 0
+    for i in range(0,4):
+        rect = generateRandRect()
+        rectList.append(rect)
 
-    # if rect.collidepoint(pos):
-    #     pygame.draw.rect(screen, RED, rect, 0)
-    #     pygame.display.update()
-    event = pygame.event.wait()
-    if (event.type == pygame.MOUSEBUTTONUP):
-        print("ahg")
-        clicked = True
-    # else:
-    #     pygame.draw.rect(screen, GREEN, rect, 0)
-    #     pygame.display.update()
-    return
+        pos = pygame.mouse.get_pos()
+        pygame.draw.rect(screen, GREEN, rect, 0)
+        pygame.display.update()
+        for rectangle in rectList:
+            if rectangle.collidepoint(pos):
+                pygame.draw.rect(screen, RED, rect, 0)
+                pygame.display.update()
+                if (event.type == pygame.MOUSEBUTTONUP):
+                    counter += 1
+            else:
+                pygame.draw.rect(screen, GREEN, rect, 0)
+                pygame.display.update()
+    if counter == 5:
+        return True
 
 def generateRandRect():
     width = random.randint(50,100)
     height = width
     left = random.randint(0, WINDOW_WIDTH - width)
     top = random.randint(0, WINDOW_HEIGHT - height)
-
     return pygame.Rect(left, top, width, height)
-
 
 main()
