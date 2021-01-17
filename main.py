@@ -40,6 +40,7 @@ def main():
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                running = False
                 pygame.quit()
             elif not completed:
                 displayTimer(screen, font)
@@ -56,12 +57,14 @@ def main():
                             pygame.display.update()
                             numTargets -= 1
                             if numTargets == 0:
-                                total_time = (pygame.time.get_ticks() - TIME_DELAY - start)
+                                total_time = (pygame.time.get_ticks() - start)
                                 print(total_time)
                                 completed = True
                                 accuracy = (accurateClicks / totalClicks) * 100
                                 stopTimer(screen, font, total_time)
                                 displayAccuracy(screen, font, accuracy)
+            else:
+                continue
         
 #returns a random pygame.rect object
 def generateRandRect():
