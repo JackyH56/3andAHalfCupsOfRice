@@ -17,8 +17,8 @@ def main():
     font = pygame.font.Font('freesansbold.ttf', FONT_SIZE)
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Mouse Sensitivity Calibrator")
-    numTargets = 3
-    rectList = []
+    numTargets = 5
+    imageList = []
     running  = True
     completed = False
     accurateClicks = 0
@@ -30,10 +30,14 @@ def main():
     pygame.time.wait(TIME_DELAY)
     clearScreen(screen)
     #draw rectangles
-    for i in range(0, numTargets):
-        rect = generateRandRect()
-        rectList.append(rect)
-        pygame.draw.rect(screen, GREEN, rect, 0)
+    iconList = ["icon-bhotify.png", "icon-bone-bhote.png", "icon-booble-bhrome.png", "icon-recycle.png"]
+    for i in range(numTargets):
+        image = pygame.image.load(random.choice(iconList)).convert()
+        icon_width = 95
+        icon_height = 96
+        coord = generateRandCoord(95, 96)
+        imageList.append((image, pygame.Rect(coord[0],coord[1], icon_width, icon_height)))
+        screen.blit(image, coord)
     pygame.display.update()
     start = pygame.time.get_ticks() - setupTime
     while running:
@@ -46,13 +50,14 @@ def main():
                 pos = pygame.mouse.get_pos()
                 if event.type == pygame.MOUSEBUTTONUP:
                     totalClicks += 1
-                    for rectangle in rectList:
-                        if rectangle.collidepoint(pos):
+                    for image in imageList:
+                        if image[1].collidepoint(pos):
                             accurateClicks += 1
-                            rectList.remove(rectangle)
+                            imageList.remove(image)
                             clearScreen(screen)
-                            for rect in rectList:
-                                pygame.draw.rect(screen, GREEN, rect, 0)
+                            for image in imageList:
+                                screen.blit(image[0], (image[1][0],image[1][1]))
+                                # pygame.draw.rect(screen, GREEN, rect, 0)
                             pygame.display.update()
                             numTargets -= 1
                             if numTargets == 0:
@@ -63,7 +68,11 @@ def main():
                                 displayAccuracy(screen, font, accuracy)
             else:
                 continue
-        
+
+def generateRandCoord(width, height):
+    x = random.randint(0, WINDOW_WIDTH - width)
+    y = random.randint(0, WINDOW_HEIGHT - height)
+    return (x,y)
 #returns a random pygame.rect object
 def generateRandRect():
     width = random.randint(50,100)
