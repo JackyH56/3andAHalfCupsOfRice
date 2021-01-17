@@ -12,7 +12,7 @@ WINDOW_WIDTH = 1500
 WINDOW_HEIGHT = 1000
 FONT_SIZE = 32
 TIME_DELAY = 3000
-iconList = ["icon-bhotify.png", "icon-bone-bhote.png", "icon-booble-bhrome.png", "icon-recycle.png"]
+iconList = ["icon-bhotify.png", "icon-bone-bhote.png", "icon-booble-bhrome.png"]
 
 def main():
     pygame.init()
@@ -76,7 +76,7 @@ def main():
                 continue
         if completed == True:
             dTime, dAccuracy = dragTest(screen, 3, total_time)
-            displayAccuracy(screen, font, accuracy, True)
+            displayAccuracy(screen, font, dAccuracy, True)
             #pause 3 seconds before starting
             pygame.time.wait(TIME_DELAY)
             running = False
@@ -104,7 +104,7 @@ def dragTest(screen, numTargets, click_time):
 
     recycle = pygame.image.load('icon-recycle.png').convert()
     screen.blit(recycle, (WINDOW_WIDTH-95,WINDOW_HEIGHT-96))
-    
+    pygame.display.update()
     for i in range(0, numTargets):
         image = pygame.image.load(random.choice(iconList)).convert()
         icon_width = 95
@@ -113,7 +113,6 @@ def dragTest(screen, numTargets, click_time):
 
         dragList.append((image, pygame.Rect(coord[0],coord[1], icon_width, icon_height)))
         screen.blit(image, coord)
-    pygame.display.update()
 
     dragStart = pygame.time.get_ticks()
     while draging:
@@ -131,7 +130,7 @@ def dragTest(screen, numTargets, click_time):
             elif event.type == pygame.MOUSEBUTTONUP:
                 total_click += 1 
                 if not selected_image == None:
-                    if selected_image[1].colliderect(recycle):
+                    if selected_image[1].colliderect(pygame.Rect(WINDOW_WIDTH-95, WINDOW_HEIGHT-96, 95, 96)):
                         on_hit += 1
                         dragList.remove(selected_image)
                         selected_image = None
@@ -151,9 +150,8 @@ def dragTest(screen, numTargets, click_time):
                 return total_drag_time, dragAccuracy
     
         screen.fill(BLACK)
-
-        recycle = pygame.Rect(WINDOW_WIDTH-120, WINDOW_HEIGHT-120, 120, 120)
-        pygame.draw.rect(screen, WHITE, recycle, 0)
+        recycle = pygame.image.load('icon-recycle.png').convert()
+        screen.blit(recycle, (WINDOW_WIDTH-95,WINDOW_HEIGHT-96))
         for image in dragList:
             screen.blit(image[0], (image[1][0],image[1][1]))
 
