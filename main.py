@@ -25,10 +25,9 @@ def main():
     totalClicks = 0
     displayInstructions(screen, font, numTargets)
     pygame.display.update()
-
+    setupTime = pygame.time.get_ticks()
     #pause 3 seconds before starting
     pygame.time.wait(TIME_DELAY)
-    print(pygame.time.get_ticks())
     clearScreen(screen)
     #draw rectangles
     for i in range(0, numTargets):
@@ -36,7 +35,7 @@ def main():
         rectList.append(rect)
         pygame.draw.rect(screen, GREEN, rect, 0)
     pygame.display.update()
-    start = pygame.time.get_ticks()
+    start = pygame.time.get_ticks() - setupTime
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -58,7 +57,6 @@ def main():
                             numTargets -= 1
                             if numTargets == 0:
                                 total_time = (pygame.time.get_ticks() - start)
-                                print(total_time)
                                 completed = True
                                 accuracy = (accurateClicks / totalClicks) * 100
                                 stopTimer(screen, font, total_time)
